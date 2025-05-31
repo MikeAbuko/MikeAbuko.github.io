@@ -1,0 +1,420 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Portfolio of Mike Churchill Abuko, an IT Support Specialist skilled in network troubleshooting, system administration, and customer service. Explore my certifications, projects, and technical expertise.">
+  <meta name="keywords" content="Mike Churchill Abuko, IT Support Specialist, Network Troubleshooting, Google IT Support, Zendesk, Dubai IT Jobs, Entry-Level IT, System Administration">
+  <meta name="author" content="Mike Churchill Abuko">
+  <title>Mike Churchill Abuko - IT Support Portfolio</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a192f;
+      color: #ccd6f6;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(10, 25, 47, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 4rem;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #64ffda;
+      text-decoration: none;
+      transition: transform 0.3s ease;
+    }
+
+    .logo:hover {
+      transform: scale(1.05);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-links a {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #ccd6f6;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: #64ffda;
+    }
+
+    section {
+      padding: 4rem 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #64ffda;
+      margin-bottom: 1.5rem;
+    }
+
+    .card {
+      background: #112240;
+      border-radius: 8px;
+      padding: 1.5rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(100, 255, 218, 0.2);
+    }
+
+    .home-section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .home-content h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1rem;
+    }
+
+    .home-content p {
+      font-size: 1.25rem;
+      color: #8892b0;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: 2px solid #64ffda;
+      color: #64ffda;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #64ffda;
+      color: #0a192f;
+    }
+
+    .list-item {
+      position: relative;
+      padding-left: 1.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+      color: #ccd6f6;
+    }
+
+    .list-item::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: #64ffda;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .card h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: #8892b0;
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    footer {
+      background: #0a192f;
+      text-align: center;
+      padding: 1rem;
+      color: #8892b0;
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+      .home-content h1 {
+        font-size: 2rem;
+      }
+
+      .nav-links {
+        gap: 1rem;
+      }
+
+      .nav-links a {
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    });
+  </script>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container">
+      <a href="#home" class="logo">MCA</a>
+      <div class="nav-links">
+        <a href="#about">About</a>
+        <a href="#experience">Experience</a>
+        <a href="#education">Education</a>
+        <a href="#certifications">Certifications</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Home Section -->
+  <section id="home" class="home-section fade-in">
+    <div class="home-content">
+      <h1>Mike Churchill Abuko</h1>
+      <p>IT Support Specialist | Network Troubleshooting | Cybersecurity Enthusiast</p>
+      <a href="#contact" class="btn">Get in Touch</a>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="fade-in">
+    <h2 class="section-title">About Me</h2>
+    <div class="card">
+      <p class="text-base">
+        I'm a dedicated IT professional passionate about solving technical challenges and delivering exceptional user support. Certified in Google IT Support and Zendesk Customer Service, I specialize in troubleshooting hardware and software issues, configuring networks, and optimizing workflows. My experience with tools like Cisco Packet Tracer, VirtualBox, and Microsoft 365, paired with strong problem-solving and communication skills, prepares me to excel in IT support roles. Currently pursuing a Foundation in Computer Science at Middlesex University Dubai, I'm eager to contribute technical expertise and a collaborative mindset to innovative IT teams.
+      </p>
+      <h3 class="section-title" style="margin-top: 1.5rem;">Technical Skills</h3>
+      <div class="grid-2">
+        <ul>
+          <li class="list-item">Troubleshooting: Hardware/software diagnostics</li>
+          <li class="list-item">Operating Systems: Windows, Linux (VirtualBox)</li>
+          <li class="list-item">Networking: Cisco Packet Tracer, firewalls</li>
+        </ul>
+        <ul>
+          <li class="list-item">Tools: MySQL, Python, HTML, CSS, Excel</li>
+          <li class="list-item">Platforms: Microsoft 365, Qwiklabs, Zendesk</li>
+          <li class="list-item">Soft Skills: Cybersecurity, teamwork</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Experience Section -->
+  <section id="experience" class="fade-in">
+    <h2 class="section-title">Professional Experience</h2>
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <div class="card">
+        <h3>IT Support Projects, Virtual Labs (Google IT Support)</h3>
+        <p>2024 – 2025</p>
+        <ul>
+          <li class="list-item">Resolved network issues in 20+ virtual scenarios using Cisco Packet Tracer (90% success rate).</li>
+          <li class="list-item">Managed Linux virtual machines in VirtualBox for optimal performance.</li>
+          <li class="list-item">Implemented firewalls and access controls in Qwiklabs environments.</li>
+          <li class="list-item">Supported peers with software installations, boosting productivity.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Customer Support & Data Entry Volunteer, Jiamini Football Academy, Kenya</h3>
+        <p>Aug 2023 – Jan 2025</p>
+        <ul>
+          <li class="list-item">Resolved 80% of member inquiries via email/phone, improving efficiency.</li>
+          <li class="list-item">Organized records for 100+ members in Excel, reducing errors by 20%.</li>
+          <li class="list-item">Enhanced communication workflows, increasing parent engagement.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Education Section -->
+  <section id="education" class="fade-in">
+    <h2 class="section-title">Education</h2>
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <div class="card">
+        <h3>Foundation in Computer Science, Technology, and Engineering</h3>
+        <p>Middlesex University Dubai, UAE | 2024 – Present</p>
+        <p>Coursework: Computer Systems, Networking Fundamentals, Excel Principles</p>
+      </div>
+      <div class="card">
+        <h3>Bachelor's in Business Administration (On Leave)</h3>
+        <p>University of the People, Online | 2024</p>
+        <p>Completed: Principles of Business Management, Introduction to Management</p>
+      </div>
+      <div class="card">
+        <h3>High School Diploma</h3>
+        <p>Gulab Lochab Academy, Eldoret, Kenya | 2023</p>
+        <p>Excelled in Mathematics, Physics, English, Swahili</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Certifications Section -->
+  <section id="certifications" class="fade-in">
+    <h2 class="section-title">Certifications</h2>
+    <div class="grid-2">
+      <div class="card">
+        <p>Google IT Support Professional Certificate, Google, 2025</p>
+      </div>
+      <div class="card">
+        <p>Zendesk Customer Service Professional Certificate, LinkedIn/Zendesk, 2025</p>
+      </div>
+      <div class="card">
+        <p>Excel Essentials Certificate, LinkedIn, 2025</p>
+      </div>
+      <div class="card">
+        <p>CSCMP Supply Chain Foundations: Warehousing Operations, CSCMP, 2025</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Section -->
+  <section id="projects" class="fade-in">
+    <h2 class="section-title">Key Projects</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Virtual Network Troubleshooting</h3>
+        <p>Cisco Packet Tracer</p>
+        <p>Resolved connectivity issues in 20+ virtual scenarios (90% success rate).</p>
+      </div>
+      <div class="card">
+        <h3>Linux System Administration</h3>
+        <p>VirtualBox</p>
+        <p>Configured user accounts and file systems for secure operations.</p>
+      </div>
+      <div class="card">
+        <h3>Network Security Implementation</h3>
+        <p>Qwiklabs</p>
+        <p>Deployed firewalls and access controls in simulated environments.</p>
+      </div>
+      <div class="card">
+        <h3>Data Management for Jiamini Football Academy</h3>
+        <p>Excel</p>
+        <p>Streamlined records for 100+ members, reducing errors by 20%.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="fade-in">
+    <h2 class="section-title">Get in Touch</h2>
+    <div class="card" style="text-align: center;">
+      <p>
+        I'm passionate about technology and eager to contribute my technical expertise to your IT team. Reach out to discuss how I can support your organization’s success.
+      </p>
+      <p style="margin: 1rem 0;"><strong>Email:</strong> <a href="mailto:m.churchillabuko@gmail.com" style="color: #64ffda; text-decoration: underline;">m.churchillabuko@gmail.com</a></p>
+      <p style="margin-bottom: 1rem;"><strong>Phone:</strong> +971 504935465</p>
+      <p style="margin-bottom: 2rem;"><strong>LinkedIn:</strong> <a href="https://linkedin.com/in/mikechurchillabuko" style="color: #64ffda; text-decoration: underline;">linkedin.com/in/mikechurchillabuko</a></p>
+      <a href="#home" class="btn">Back to Top</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 Mike Churchill Abuko. Inspired by Brittany Chiang.</p>
+  </footer>
+</body>
+</html>
